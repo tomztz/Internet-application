@@ -10,6 +10,6 @@ Weather forecasting application developed during college using nodejs and vue us
 
 ## Getting started
 
-`node app.js`\
+`node app.js`
 
 `http://localhost:3000/`
