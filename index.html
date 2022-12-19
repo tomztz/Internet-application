@@ -1,0 +1,148 @@
+<style>
+    h1 {
+        text-align: center;
+        font-size: 26px;
+        padding-top: 25px;
+    }
+
+    p {
+        align-items: center;
+        font-size: 15px;
+    }
+
+    li {
+        display: block;
+        float: left;
+        width: 300px;
+        height: 100px;
+        padding: 3px;
+       
+    }
+
+    form {
+        text-align: center;
+    }
+
+    input {
+        text-align: center;
+        padding: 4px 8px;
+        margin: 4px;
+    }
+
+    span {
+        text-align: center;
+        font-size: 15px;
+    }
+
+    .submit {
+        text-align: center;
+        font-size: 15px;
+        color: #fff;
+        background: #222;
+        padding: 6px 12px;
+        border: none;
+        margin-top: 8px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+</style>
+
+<script type="module">
+    import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+    createApp({
+        data() {
+            return {
+                message: 'Wheather forecasing for 4 days',
+                city: "",
+                formSubmitted: false,
+                time:"",
+                wheather: [],
+                pollution: []
+
+            }
+        },
+        methods: {
+            submitForm: function () {
+                this.formSubmitted = true;
+                console.log(this.time);
+                if(this.time===""){
+                this.getData(this.city);
+                this.getPollution(this.city);
+                }
+                else{
+                    this.getAtTime(this.city,this.time);
+                    this.getPollution(this.city);
+                }
+            },
+            resetForm: function () {
+                this.wheather = [];
+                this.city = "";
+                this.time = "";
+                this.formSubmitted = false;
+                this.pollution = {};
+            },
+            async getData(city) {
+                try {
+                    let response = await fetch(`http://localhost:3000/wheather/${city}`);
+                    this.wheather = await response.json();;
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+            async getPollution(city) {
+                try {
+                    let response = await fetch(`http://localhost:3000/pollution/${city}`);
+                    this.pollution = await response.json();;
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+            async getAtTime(city,time) {
+                try {
+                    let response = await fetch(`http://localhost:3000/wheather/${city}/${time}`);
+                    this.wheather = await response.json();;
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+        },
+    }).mount('#app')
+</script>
+
+<div id="app">
+    <h1>{{ message }}</h1>
+
+    <form @submit.prevent="submitForm" v-if="!formSubmitted">
+        <span>City:</span><br>
+        <input v-model="city" type="text" placeholder="Enter the city to forecast" /><br>
+        <span>Time in 3 hours frame: e.g. (00:00:00)</span><br>
+        <input v-model="time" type="text" placeholder="Enter the time to forecast" /><br>
+        <input class="submit" type="submit" value="Submit">
+    </form>
+    <div v-if="formSubmitted">
+        <div class='text-center'>
+            <button @click='resetForm'>reset</button>
+        </div>
+
+        <p>Average pm2.5 next 5 days: {{pollution.avrgPollution}}</p>
+        <p>{{pollution.doWearMask}}</p>
+
+
+        <ol>
+            <li v-for="item of wheather" v-if="item!==null">
+                <h3>{{item.Date}}<h3>
+                        <span v-if="item.doBringUmbrella != 'null'">{{item.doBringUmbrella}}</span>
+                        <p>{{item.wheatherType}}</p>
+                        <P>The average temperature is: {{item.avrTemp}}°C</P>
+                        <p>The wind speed is :{{item.windSpeed}}meter/sec</p>
+                        <p>the rain level is :{{item.rainLevel}}mm</p>
+            </li>
+
+
+        </ol>
+    </div>
+</div>
